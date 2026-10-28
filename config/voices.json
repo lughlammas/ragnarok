@@ -1,0 +1,20 @@
+{
+  "default_voice": "michael-en",
+  "openai_aliases": ["alloy", "ash", "ballad", "coral", "echo", "fable", "onyx", "nova", "sage", "shimmer", "verse"],
+  "voices": [
+    {"id": "michael-en", "label": "Michael (maduro, EN)", "engine": "kokoro", "voice": "am_michael", "lang": "en", "kokoro_lang": "en-us", "speed": 1.0,
+     "description": "Voz masculina madura, inglês americano."},
+    {"id": "onyx-en", "label": "Onyx (grave, EN)", "engine": "kokoro", "voice": "am_onyx", "lang": "en", "kokoro_lang": "en-us", "speed": 0.88,
+     "description": "Voz masculina grave, mais pausada (speed 0,88)."},
+    {"id": "sabio-en", "label": "Sábio (EN)", "engine": "supertonic", "voice": "M5", "lang": "en", "speed": 0.85,
+     "description": "Supertonic-3 M5, grave e calmo (speed 0,85)."},
+    {"id": "alex-pt", "label": "Alex (maduro, PT-BR)", "engine": "kokoro", "voice": "pm_alex", "lang": "pt", "kokoro_lang": "pt-br", "speed": 1.0,
+     "description": "Voz masculina madura, português do Brasil."},
+    {"id": "sabio-pt", "label": "Sábio (PT-BR)", "engine": "supertonic", "voice": "M5", "lang": "pt", "speed": 0.85,
+     "description": "Supertonic-3 M5, grave e calmo (speed 0,85). O modelo declara 'pt' (variante BR/PT não confirmada)."},
+    {"id": "dora-pt", "label": "Dora (feminina, PT-BR)", "engine": "kokoro", "voice": "pf_dora", "lang": "pt", "kokoro_lang": "pt-br", "speed": 1.0,
+     "description": "Voz feminina agradável, português do Brasil."},
+    {"id": "heart-en", "label": "Heart (feminina, EN)", "engine": "kokoro", "voice": "af_heart", "lang": "en", "kokoro_lang": "en-us", "speed": 1.0,
+     "description": "Voz feminina agradável, inglês americano."}
+  ]
+}
