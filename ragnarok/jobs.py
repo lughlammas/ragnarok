@@ -88,7 +88,10 @@ class JobManager:
                 pass
 
     def _save(self):
-        items = sorted(self.jobs.values(), key=lambda j: j.created)[-MAX_HISTORY:]
+        ordered = sorted(self.jobs.values(), key=lambda j: j.created)
+        approved = [j for j in ordered if j.approved]
+        recent = [j for j in ordered if not j.approved][-MAX_HISTORY:]
+        items = sorted({j.id: j for j in approved + recent}.values(), key=lambda j: j.created)
         tmp = HISTORY.with_suffix(".tmp")
         tmp.write_text(json.dumps([asdict(j) for j in items], ensure_ascii=False, indent=1), encoding="utf-8")
         tmp.replace(HISTORY)

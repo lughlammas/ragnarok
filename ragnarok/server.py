@@ -9,7 +9,7 @@ from urllib.parse import urlparse
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from . import __version__, audio, models, synth, voices as vc
 from .engines import MANAGER
@@ -88,7 +88,7 @@ class JobIn(BaseModel):
     title: str = ""
     kind: str = "auto"          # auto | say | book
     announce_titles: bool = True
-    pronunciation: dict[str, str] = {}
+    pronunciation: dict[str, str] = Field(default_factory=dict)
 
 
 class ApprovedBookIn(BaseModel):
