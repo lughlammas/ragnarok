@@ -3,13 +3,16 @@
 Leitor de textos em voz alta, **local, só CPU, uso pessoal**. Escrito do zero (não usa código do VoiceStudio).
 Nenhum texto sai do computador; a internet é usada só na instalação (pacotes e modelos).
 
+**Configuração inicial recomendada para avaliação:** voz `alex-pt` (Kokoro / `pm_alex`, PT-BR), velocidade `0.95` e saída WAV. A interface abre com essa voz e formato selecionados. Música e efeitos não são aplicados.
+
 ## Instalar (Windows 11)
 
 1. Instale o Python 3.12 (64 bits) se ainda não tiver: `winget install -e --id Python.Python.3.12`
 2. Extraia o zip numa pasta **sem espaços ou acentos no caminho** (ex.: `C:\Ragnarok`).
 3. Duplo clique em `install.bat` (ou: `powershell -ExecutionPolicy Bypass -File .\install.ps1`).
-   Cria a pasta `.venv`, instala as dependências, baixa os modelos (~0,7 GB) e roda um diagnóstico.
-   Reserve ~2 GB livres (medido na box Linux: modelos 0,72 GB + .venv 0,31 GB; no Windows pode variar).
+   Cria a pasta `.venv`, instala as dependências, baixa Kokoro (necessário para Alex) e roda um diagnóstico.
+   O Supertonic, usado por vozes opcionais, pode ser instalado separadamente com `ragnarok models`.
+   Reserve ~1,5 GB livres; o tamanho exato varia entre versões do Python e do Windows.
 
 Linux/macOS: `./install.sh`.
 
@@ -18,7 +21,8 @@ Linux/macOS: `./install.sh`.
 ```
 ragnarok.bat                      abre a interface web em http://127.0.0.1:8765
 ragnarok.bat voices               lista as vozes
-ragnarok.bat say "Olá, mundo" --voice alex-pt --out ola.mp3
+ragnarok.bat say "Olá, mundo" --voice alex-pt --speed 0.95 --out ola.wav
+ragnarok.bat models --kokoro         instala só o engine usado por Alex
 ragnarok.bat say --file texto.txt --voice sabio-pt --speed 0.95 --out texto.wav
 ragnarok.bat book ensaio.md --voice alex-pt --out ensaio.m4b --title "Meu ensaio" --author "Autor"
 ragnarok.bat doctor [--full]      diagnóstico da instalação
@@ -27,7 +31,7 @@ ragnarok.bat doctor [--full]      diagnóstico da instalação
 
 **Vozes** (arquivo `config/voices.json`): `michael-en` (maduro, EN), `onyx-en` (grave, EN), `sabio-en` (EN),
 `alex-pt` (maduro, PT-BR), `sabio-pt` (PT-BR), `dora-pt` (feminina, PT-BR), `heart-en` (feminina, EN).
-`--speed` é um multiplicador sobre a velocidade base da voz (padrão 1.0).
+`--speed` é um multiplicador sobre a velocidade base da voz (padrão 0.95; a velocidade efetiva de Alex começa em 0.95×).
 
 **Livros** (`book`): cada cabeçalho Markdown do nível mais alto do arquivo (`#`) vira um capítulo (títulos mais fundos
 viram subtítulos lidos no texto). O título do capítulo é lido em voz alta (use `--no-titles` para não ler).
@@ -36,8 +40,7 @@ por pontuação (`.` 0,4 s, `!?` 0,45 s, `…` 0,7 s, fim de parágrafo 0,8 s, t
 Saída `.m4b` ou `.mp3` com marcadores de capítulo. **Se interromper (Ctrl+C, queda de luz), rode o mesmo comando
 de novo: os blocos já gerados são reaproveitados** (ficam em `data\work\`).
 
-**Interface web**: caixa de texto, voz, velocidade, formato, upload de `.md`/`.txt` (vira livro .m4b), fila com
-progresso, histórico com player e download, botão Retomar. Escuta só em 127.0.0.1 e rejeita Host/Origin de fora.
+**Interface web**: quatro etapas — importar capítulo, gerar e escutar, aprovar capítulo, exportar audiobook. A aprovação preserva cópias do texto original e do áudio, com hashes de integridade e as configurações da geração. Áudios aprovados não podem ser apagados nem reprocessados; uma correção editorial entra como uma nova geração. Correções de pronúncia opcionais (`termo=leitura`) alteram apenas o texto enviado à síntese. A exportação seleciona e ordena capítulos aprovados, cria M4B com título, autor e marcadores e não roda a síntese novamente. Escuta só em 127.0.0.1 e rejeita Host/Origin de fora.
 
 **API compatível com OpenAI**: `POST http://127.0.0.1:8765/v1/audio/speech` com
 `{"model":"tts-1","input":"texto","voice":"alex-pt","response_format":"mp3","speed":1.0}`

@@ -66,8 +66,7 @@ Kokoro 539 MB -> após `unload` 422 MB. Não acumula ao alternar engines. O pico
 Projeção (inferência, NÃO medida): com picos de 0,55-0,83 GB cabe folgado nos 7,7 GB do Gui; a velocidade na i5-12450H pode diferir bastante da do Xeon.
 
 ## 6. O que NÃO foi testado
-- **Windows 11** (instalação, `ragnarok.bat`, `install.bat`, travas `msvcrt`, medição de RAM via `psapi`, caminhos): nada executado.
-- PowerShell 5.1 (o do Windows); só o parser do PowerShell 7.
+- Windows 11 e PowerShell do Windows: a instalação, `ragnarok.bat doctor`, Kokoro/Alex, WAV e medições foram executados em 29/10/2026; detalhes na seção 9. A trava `msvcrt` foi exercitada pela aprovação da geração, mas concorrência entre processos não foi repetida.
 - Pico de RAM e velocidade na i5-12450H com 7,7 GB; Python 3.11/3.12 (testado só 3.13.5); livros longos (horas) e textos muito grandes (>3 MB).
 - Piper (não incluído nesta versão). Qualidade/naturalidade do áudio (não consigo ouvir).
 - Playback de `.m4b` dentro do navegador (a interface oferece só "Baixar" para m4b).
@@ -90,3 +89,17 @@ Zip final extraído em pasta nova e instalado do zero (`install.sh`: "TUDO OK");
 35,4 s no total (RTF 0,162), RAM pico 694 MB. (A mesma tarefa levou 28,9 s numa execução anterior: a box tem carga variável, então
 espere variação de ~20% nos tempos.) A trava de processo, a retomada e a interface no navegador foram testadas no zip anterior a
 estas duas mudanças pequenas (favicon/204 e trava), sem outra mudança de código depois.
+
+## 9. Windows 11 — Alex/Kokoro e fluxo editorial (29/10/2026)
+
+Ambiente desta execução: Windows 11, Python 3.12.10 64 bits, Kokoro ONNX 0.6.1, ONNX Runtime 1.31.1, CPU.
+
+- `install.ps1`: instalação concluída; Kokoro (325,5 MB + 28,2 MB) conferido pelos hashes fixados; diagnóstico terminou em `TUDO OK`. O Supertonic não foi baixado.
+- `ragnarok.bat doctor`: `TUDO OK`; ffmpeg do `imageio-ffmpeg` reconhecido.
+- Texto integral de calibração `exemplos/amostra_calibracao_alex_ptbr.txt`, voz `alex-pt` / `pm_alex`, PT-BR, 0,95, WAV: 724 caracteres, 13 blocos, 56,86 s, 27,9 s de execução (RTF 0,490), pico 538 MB, zero anomalias. WAV PCM 16-bit, 24 kHz, mono, 2.729.516 bytes; sem amostras não finitas nem clipping detectado.
+- Trecho adicional de pronúncia enviado ao Alex com “zazen”, “aquietamento”, “transmutação”, “integração” e pergunta: WAV de 7,6 s, 1 bloco, 6,2 s, pico 552 MB, zero anomalias. A pronúncia foi exercitada no sintetizador; a avaliação auditiva final pertence ao autor.
+- Fluxo de aprovação: áudio e texto copiados à área protegida, hashes registrados e exclusão recusada. Exportação M4B reutilizou WAVs, verificou duração (3,38 s no trecho curto de 2,7 s, incluindo priming AAC) e ordem/metadados; nenhuma chamada ao sintetizador ocorreu na exportação.
+- `python -m unittest discover -s tests`: 9/9 passaram. Sintaxe JavaScript da interface verificada com `node --check`.
+- O instalador foi corrigido para direcionar temporários do Windows a `data/tmp`; sem isso, `ensurepip` e o phonemizer podem falhar em ambientes que bloqueiam `%TEMP%` do sistema.
+
+Ainda não foi feita avaliação auditiva subjetiva nem teste visual em navegador do fluxo web. A compatibilidade do arquivo e as métricas foram verificadas localmente.

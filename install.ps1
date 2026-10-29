@@ -7,6 +7,10 @@ param([switch]$SkipTest)
 $ErrorActionPreference = 'Continue'
 Set-Location -LiteralPath $PSScriptRoot
 $env:PYTHONUTF8 = '1'
+$localTemp = Join-Path $PSScriptRoot 'data\tmp'
+New-Item -ItemType Directory -Force -Path $localTemp | Out-Null
+$env:TEMP = $localTemp
+$env:TMP = $localTemp
 
 function Fail($msg) { Write-Host "ERRO: $msg" -ForegroundColor Red; exit 1 }
 
@@ -35,7 +39,7 @@ function Run($exe, [string[]]$argList) {
 Write-Host "== Ragnarok: instalação ==" -ForegroundColor Cyan
 
 $free = (Get-PSDrive -Name ((Get-Location).Drive.Name)).Free
-if ($free -lt 3GB) { Write-Host ("AVISO: só {0:N1} GB livres neste disco; recomendo pelo menos 3 GB." -f ($free / 1GB)) -ForegroundColor Yellow }
+if ($free -gt 0 -and $free -lt 3GB) { Write-Host ("AVISO: só {0:N1} GB livres neste disco; recomendo pelo menos 3 GB." -f ($free / 1GB)) -ForegroundColor Yellow }
 
 $py = Get-PythonExe
 if (-not $py) {
@@ -52,9 +56,9 @@ if (-not (Test-Path '.venv\Scripts\python.exe')) { Run $py @('-m', 'venv', '.ven
 $vpy = Join-Path $PSScriptRoot '.venv\Scripts\python.exe'
 Run $vpy @('-m', 'pip', 'install', '--upgrade', 'pip', '-q')
 Run $vpy @('-m', 'pip', 'install', '-r', 'requirements.txt')
-Run $vpy @('-m', 'ragnarok', 'models')
+Run $vpy @('-m', 'ragnarok', 'models', '--kokoro')
 if (-not $SkipTest) { Run $vpy @('-m', 'ragnarok', 'doctor') }
 
 Write-Host ""
 Write-Host "Pronto! Para abrir:  .\ragnarok.bat     (ou  .\run.ps1)" -ForegroundColor Green
-Write-Host "Exemplo:  .\ragnarok.bat say ""Olá, mundo"" --voice alex-pt --out ola.mp3"
+Write-Host "Exemplo:  .\ragnarok.bat say ""Olá, mundo"" --voice alex-pt --speed 0.95 --out ola.wav"

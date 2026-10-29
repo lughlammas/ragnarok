@@ -116,7 +116,7 @@ def cmd_voices(a):
 
 def cmd_models(a):
     from . import models
-    models.ensure_all()
+    models.ensure_all(kokoro_only=a.kokoro)
     return 0
 
 
@@ -128,7 +128,7 @@ def cmd_doctor(a):
         print("  [ERRO] Python 3.11+ é necessário"); ok = False
     if sys.version_info >= (3, 14):
         print("  [AVISO] Python 3.14+: kokoro-onnx 0.6.1 declara <3.14")
-    for mod in ("numpy", "soundfile", "onnxruntime", "kokoro_onnx", "supertonic", "fastapi", "uvicorn", "multipart"):
+    for mod in ("numpy", "soundfile", "onnxruntime", "kokoro_onnx", "fastapi", "uvicorn", "multipart"):
         try:
             m = __import__(mod)
             print(f"  [ok] {mod} {getattr(m, '__version__', '')}")
@@ -139,9 +139,10 @@ def cmd_doctor(a):
     except Exception as e:
         print(f"  [ERRO] ffmpeg: {e}"); ok = False
     from . import models
-    for k, v in models.status().items():
-        print(f"  [{'ok' if v else 'FALTA'}] modelo {k}")
-        ok = ok and v
+    model_status = models.status()
+    print(f"  [{'ok' if model_status['kokoro'] else 'FALTA'}] modelo Kokoro (necessário para Alex)")
+    ok = ok and model_status["kokoro"]
+    print(f"  [{'opcional' if not model_status['supertonic'] else 'ok'}] modelo Supertonic (vozes opcionais)")
     if a.full and ok:
         from . import synth
         ensure_dirs()
@@ -165,14 +166,14 @@ def main(argv=None) -> int:
     s.add_argument("text", nargs="*", help="texto (ou use --file)")
     s.add_argument("--file", "-f", help="arquivo .txt/.md ('-' = stdin)")
     s.add_argument("--voice", "-v", default=None, help="id da voz (veja: ragnarok voices)")
-    s.add_argument("--speed", "-s", type=float, default=1.0, help="multiplicador de velocidade (0.5-2.0), padrão 1.0")
+    s.add_argument("--speed", "-s", type=float, default=0.95, help="multiplicador de velocidade (0.5-2.0), padrão 0.95")
     s.add_argument("--out", "-o", default="ragnarok.wav", help="arquivo de saída (.wav .mp3 .m4a .ogg .opus .flac)")
     s.set_defaults(fn=cmd_say)
 
     b = sub.add_parser("book", help="converter um .md/.txt em audiolivro com capítulos")
     b.add_argument("file")
     b.add_argument("--voice", "-v", default=None)
-    b.add_argument("--speed", "-s", type=float, default=1.0)
+    b.add_argument("--speed", "-s", type=float, default=0.95)
     b.add_argument("--out", "-o", default=None, help="saída (.m4b ou .mp3); padrão: <arquivo>.m4b")
     b.add_argument("--title", help="título do livro (metadados)")
     b.add_argument("--author", help="autor (metadados)")
@@ -187,7 +188,9 @@ def main(argv=None) -> int:
     w.set_defaults(fn=cmd_web)
 
     sub.add_parser("voices", help="listar vozes").set_defaults(fn=cmd_voices)
-    sub.add_parser("models", help="baixar/verificar modelos").set_defaults(fn=cmd_models)
+    m = sub.add_parser("models", help="baixar/verificar modelos")
+    m.add_argument("--kokoro", action="store_true", help="instala apenas Kokoro, necessário para a voz Alex")
+    m.set_defaults(fn=cmd_models)
     d = sub.add_parser("doctor", help="diagnóstico da instalação")
     d.add_argument("--full", action="store_true", help="também gera uma frase de teste em 2 vozes")
     d.set_defaults(fn=cmd_doctor)

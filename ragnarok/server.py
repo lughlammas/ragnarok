@@ -76,18 +76,25 @@ def api_status():
 def _job_dict(j):
     from dataclasses import asdict
     d = asdict(j)
-    d["has_audio"] = j.status == "done" and j.out_path.exists()
+    d["has_audio"] = j.status == "done" and (j.approved_audio_path if j.approved else j.out_path).exists()
     return d
 
 
 class JobIn(BaseModel):
     text: str
     voice: Optional[str] = None
-    speed: float = 1.0
-    format: str = "mp3"
+    speed: float = 0.95
+    format: str = "wav"
     title: str = ""
     kind: str = "auto"          # auto | say | book
     announce_titles: bool = True
+    pronunciation: dict[str, str] = {}
+
+
+class ApprovedBookIn(BaseModel):
+    chapter_ids: list[str]
+    title: str
+    author: str = ""
 
 
 def _kind(text: str, kind: str) -> str:
@@ -104,14 +111,14 @@ def api_submit(j: JobIn):
     try:
         title = j.title or (" ".join(j.text.split())[:40] or "Texto")
         job = jobs().submit(j.text, _kind(j.text, j.kind), j.voice or vc.default_voice_id(),
-                            j.speed, j.format, title, j.announce_titles)
+                            j.speed, j.format, title, j.announce_titles, j.pronunciation)
     except ValueError as e:
         raise HTTPException(400, str(e))
     return _job_dict(job)
 
 
 @app.post("/api/jobs/upload")
-async def api_upload(file: UploadFile = File(...), voice: str = Form(""), speed: float = Form(1.0),
+async def api_upload(file: UploadFile = File(...), voice: str = Form(""), speed: float = Form(0.95),
                      format: str = Form("m4b"), title: str = Form(""), announce_titles: bool = Form(True)):
     name = (file.filename or "").lower()
     if not name.endswith((".md", ".txt", ".markdown")):
@@ -147,11 +154,43 @@ def api_job(jid: str):
 @app.get("/api/jobs/{jid}/audio")
 def api_audio(jid: str, download: int = 0):
     j = jobs().get(jid)
-    if not j or j.status != "done" or not j.out_path.exists():
+    if not j or j.status != "done":
+        raise HTTPException(404, "áudio não disponível")
+    audio_path = j.approved_audio_path if j.approved else j.out_path
+    if not audio_path.exists():
         raise HTTPException(404, "áudio não disponível")
     mt = audio.FORMATS[j.format][1]
     fname = "".join(c if c.isalnum() or c in " -_" else "_" for c in j.title).strip() or "ragnarok"
-    return FileResponse(j.out_path, media_type=mt, filename=f"{fname}.{j.format}" if download else None)
+    return FileResponse(audio_path, media_type=mt, filename=f"{fname}.{j.format}" if download else None)
+
+
+@app.post("/api/jobs/{jid}/approve")
+def api_approve(jid: str):
+    try:
+        return _job_dict(jobs().approve(jid))
+    except KeyError:
+        raise HTTPException(404, "trabalho não encontrado")
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+
+
+@app.post("/api/books/export-approved")
+async def api_export_approved(book: ApprovedBookIn):
+    if not book.title.strip():
+        raise HTTPException(400, "Informe o título do audiobook.")
+    try:
+        selected = jobs().get_approved(book.chapter_ids)
+        safe_title = "".join(c if c.isalnum() or c in " -_" else "_" for c in book.title).strip() or "audiobook"
+        out = OUTPUT_DIR / f"{safe_title}-{__import__('uuid').uuid4().hex[:8]}.m4b"
+        inputs = [(j.approved_audio_path, j.chapter_title or j.title) for j in selected]
+        duration = await run_in_threadpool(audio.export_approved, inputs, out, book.title, book.author)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+    except RuntimeError as e:
+        raise HTTPException(500, str(e))
+    return FileResponse(out, media_type="audio/mp4", filename=f"{safe_title}.m4b",
+                        headers={"X-Audiobook-Duration": f"{duration:.2f}",
+                                 "X-Audiobook-Chapters": str(len(selected))})
 
 
 @app.post("/api/jobs/{jid}/retry")
@@ -170,6 +209,8 @@ def api_delete(jid: str):
         return {"result": jobs().delete(jid)}
     except KeyError:
         raise HTTPException(404, "trabalho não encontrado")
+    except ValueError as e:
+        raise HTTPException(400, str(e))
 
 
 # ------------------------------------------------------------ /v1 (compatível com OpenAI)
@@ -179,7 +220,7 @@ class SpeechIn(BaseModel):
     input: str
     voice: Optional[str] = None
     response_format: str = "mp3"
-    speed: float = 1.0
+    speed: float = 0.95
 
 
 _OPENAI_FORMATS = {"mp3": "mp3", "opus": "opus", "aac": "aac", "flac": "flac", "wav": "wav", "pcm": "pcm"}

@@ -3,6 +3,7 @@ import os
 import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 from typing import List, Optional, Tuple
 
@@ -85,6 +86,53 @@ def encode(wav: Path, out: Path, fmt: str, chapters: Optional[List[Tuple[str, fl
     if r.returncode != 0:
         raise RuntimeError(f"ffmpeg falhou: {r.stderr.strip()[-500:]}")
     os.replace(tmp, out)
+
+
+def export_approved(chapter_files: List[Tuple[Path, str]], out: Path, title: str, author: str = "") -> float:
+    """Build an M4B from approved audio files; this path never calls a TTS engine."""
+    if not chapter_files:
+        raise ValueError("Nenhum áudio aprovado foi selecionado.")
+    durations = []
+    for path, _chapter_title in chapter_files:
+        duration = ffprobe_duration(path)
+        if duration is None or duration <= 0:
+            raise RuntimeError(f"Não foi possível verificar a duração de {path.name}.")
+        durations.append(duration)
+    chapters, cursor = [], 0.0
+    for (_path, chapter_title), duration in zip(chapter_files, durations):
+        chapters.append((chapter_title, cursor, cursor + duration))
+        cursor += duration
+
+    out.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix="ragnarok-export-", dir=str(out.parent)) as temp_name:
+        wav = Path(temp_name) / "approved-chapters.wav"
+        args = [ffmpeg_exe(), "-y", "-hide_banner", "-loglevel", "error"]
+        for path, _ in chapter_files:
+            args += ["-i", str(path)]
+        filters = []
+        for index in range(len(chapter_files)):
+            filters.append(f"[{index}:a:0]aresample=24000,aformat=sample_fmts=s16:channel_layouts=mono[a{index}]")
+        inputs = "".join(f"[a{i}]" for i in range(len(chapter_files)))
+        filters.append(f"{inputs}concat=n={len(chapter_files)}:v=0:a=1[outa]")
+        args += ["-filter_complex", ";".join(filters), "-map", "[outa]", "-c:a", "pcm_s16le", str(wav)]
+        result = subprocess.run(args, capture_output=True, text=True)
+        if result.returncode:
+            raise RuntimeError(f"Não foi possível concatenar os áudios aprovados: {result.stderr.strip()[-500:]}")
+        encode(wav, out, "m4b", chapters=chapters, title=title, author=author)
+
+    actual = ffprobe_duration(out)
+    if actual is None or abs(actual - cursor) > max(2.0, cursor * 0.02):
+        out.unlink(missing_ok=True)
+        raise RuntimeError(f"Verificação de duração do audiobook falhou (esperado {cursor:.1f}s; encontrado {actual}).")
+    probe = subprocess.run([ffmpeg_exe(), "-hide_banner", "-i", str(out), "-f", "ffmetadata", "-"],
+                           capture_output=True)
+    metadata = probe.stdout.decode("utf-8", errors="replace")
+    found_titles = [line[6:] for line in metadata.splitlines() if line.startswith("title=")]
+    expected_titles = [chapter_title for _path, chapter_title in chapter_files]
+    if probe.returncode or found_titles[-len(expected_titles):] != expected_titles:
+        out.unlink(missing_ok=True)
+        raise RuntimeError("Verificação da ordem/metadados dos capítulos falhou.")
+    return actual
 
 
 # ---------------------------------------------------------------- memória

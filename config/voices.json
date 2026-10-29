@@ -1,5 +1,5 @@
 {
-  "default_voice": "michael-en",
+  "default_voice": "alex-pt",
   "openai_aliases": ["alloy", "ash", "ballad", "coral", "echo", "fable", "onyx", "nova", "sage", "shimmer", "verse"],
   "voices": [
     {"id": "michael-en", "label": "Michael (maduro, EN)", "engine": "kokoro", "voice": "am_michael", "lang": "en", "kokoro_lang": "en-us", "speed": 1.0,

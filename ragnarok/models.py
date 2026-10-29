@@ -74,9 +74,12 @@ def ensure_supertonic() -> None:
     TTS(model_dir=str(SUPERTONIC_DIR), auto_download=True)
 
 
-def ensure_all() -> None:
+def ensure_all(kokoro_only: bool = False) -> None:
     print("Kokoro (fp32):")
     ensure_kokoro()
+    if kokoro_only:
+        print("Kokoro pronto (Supertonic não instalado).")
+        return
     print("Supertonic-3:")
     ensure_supertonic()
     print("Modelos prontos.")
