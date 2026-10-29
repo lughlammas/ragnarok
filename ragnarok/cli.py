@@ -140,9 +140,13 @@ def cmd_doctor(a):
         print(f"  [ERRO] ffmpeg: {e}"); ok = False
     from . import models
     model_status = models.status()
-    print(f"  [{'ok' if model_status['kokoro'] else 'FALTA'}] modelo Kokoro (necessário para Alex)")
-    ok = ok and model_status["kokoro"]
-    print(f"  [{'opcional' if not model_status['supertonic'] else 'ok'}] modelo Supertonic (vozes opcionais)")
+    required_engine = vc.resolve(None).engine
+    for engine, name in (("kokoro", "Kokoro"), ("supertonic", "Supertonic")):
+        if engine == required_engine:
+            print(f"  [{'ok' if model_status[engine] else 'FALTA'}] modelo {name} (necessário para {vc.default_voice_id()})")
+            ok = ok and model_status[engine]
+        else:
+            print(f"  [{'ok' if model_status[engine] else 'opcional'}] modelo {name} (engine alternativo)")
     if a.full and ok:
         from . import synth
         ensure_dirs()
@@ -166,14 +170,14 @@ def main(argv=None) -> int:
     s.add_argument("text", nargs="*", help="texto (ou use --file)")
     s.add_argument("--file", "-f", help="arquivo .txt/.md ('-' = stdin)")
     s.add_argument("--voice", "-v", default=None, help="id da voz (veja: ragnarok voices)")
-    s.add_argument("--speed", "-s", type=float, default=0.95, help="multiplicador de velocidade (0.5-2.0), padrão 0.95")
+    s.add_argument("--speed", "-s", type=float, default=0.85, help="multiplicador de velocidade (0.5-2.0), padrão 0.85")
     s.add_argument("--out", "-o", default="ragnarok.wav", help="arquivo de saída (.wav .mp3 .m4a .ogg .opus .flac)")
     s.set_defaults(fn=cmd_say)
 
     b = sub.add_parser("book", help="converter um .md/.txt em audiolivro com capítulos")
     b.add_argument("file")
     b.add_argument("--voice", "-v", default=None)
-    b.add_argument("--speed", "-s", type=float, default=0.95)
+    b.add_argument("--speed", "-s", type=float, default=0.85)
     b.add_argument("--out", "-o", default=None, help="saída (.m4b ou .mp3); padrão: <arquivo>.m4b")
     b.add_argument("--title", help="título do livro (metadados)")
     b.add_argument("--author", help="autor (metadados)")

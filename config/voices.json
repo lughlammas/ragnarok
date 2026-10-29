@@ -1,5 +1,5 @@
 {
-  "default_voice": "alex-pt",
+  "default_voice": "sabio-pt",
   "openai_aliases": ["alloy", "ash", "ballad", "coral", "echo", "fable", "onyx", "nova", "sage", "shimmer", "verse"],
   "voices": [
     {"id": "michael-en", "label": "Michael (maduro, EN)", "engine": "kokoro", "voice": "am_michael", "lang": "en", "kokoro_lang": "en-us", "speed": 1.0,
@@ -10,8 +10,8 @@
      "description": "Supertonic-3 M5, grave e calmo (speed 0,85)."},
     {"id": "alex-pt", "label": "Alex (maduro, PT-BR)", "engine": "kokoro", "voice": "pm_alex", "lang": "pt", "kokoro_lang": "pt-br", "speed": 1.0,
      "description": "Voz masculina madura, português do Brasil."},
-    {"id": "sabio-pt", "label": "Sábio (PT-BR)", "engine": "supertonic", "voice": "M5", "lang": "pt", "speed": 0.85,
-     "description": "Supertonic-3 M5, grave e calmo (speed 0,85). O modelo declara 'pt' (variante BR/PT não confirmada)."},
+    {"id": "sabio-pt", "label": "Sábio (PT; sotaque a confirmar)", "engine": "supertonic", "voice": "M5", "lang": "pt", "speed": 1.0,
+     "description": "Supertonic-3 M5; avaliação em português do Brasil a 0,85×. O modelo declara 'pt' (variante BR/PT não confirmada)."},
     {"id": "dora-pt", "label": "Dora (feminina, PT-BR)", "engine": "kokoro", "voice": "pf_dora", "lang": "pt", "kokoro_lang": "pt-br", "speed": 1.0,
      "description": "Voz feminina agradável, português do Brasil."},
     {"id": "heart-en", "label": "Heart (feminina, EN)", "engine": "kokoro", "voice": "af_heart", "lang": "en", "kokoro_lang": "en-us", "speed": 1.0,

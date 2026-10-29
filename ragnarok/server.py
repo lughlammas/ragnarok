@@ -83,7 +83,7 @@ def _job_dict(j):
 class JobIn(BaseModel):
     text: str
     voice: Optional[str] = None
-    speed: float = 0.95
+    speed: float = 0.85
     format: str = "wav"
     title: str = ""
     kind: str = "auto"          # auto | say | book
@@ -118,7 +118,7 @@ def api_submit(j: JobIn):
 
 
 @app.post("/api/jobs/upload")
-async def api_upload(file: UploadFile = File(...), voice: str = Form(""), speed: float = Form(0.95),
+async def api_upload(file: UploadFile = File(...), voice: str = Form(""), speed: float = Form(0.85),
                      format: str = Form("m4b"), title: str = Form(""), announce_titles: bool = Form(True)):
     name = (file.filename or "").lower()
     if not name.endswith((".md", ".txt", ".markdown")):
@@ -220,7 +220,7 @@ class SpeechIn(BaseModel):
     input: str
     voice: Optional[str] = None
     response_format: str = "mp3"
-    speed: float = 0.95
+    speed: float = 0.85
 
 
 _OPENAI_FORMATS = {"mp3": "mp3", "opus": "opus", "aac": "aac", "flac": "flac", "wav": "wav", "pcm": "pcm"}

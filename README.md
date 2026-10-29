@@ -3,16 +3,16 @@
 Leitor de textos em voz alta, **local, só CPU, uso pessoal**. Escrito do zero (não usa código do VoiceStudio).
 Nenhum texto sai do computador; a internet é usada só na instalação (pacotes e modelos).
 
-**Configuração inicial recomendada para avaliação:** voz `alex-pt` (Kokoro / `pm_alex`, PT-BR), velocidade `0.95` e saída WAV. A interface abre com essa voz e formato selecionados. Música e efeitos não são aplicados.
+**Configuração inicial para avaliação:** voz `sabio-pt` (Supertonic M5), velocidade `0.85` e saída WAV. A interface abre com essa voz e formato selecionados. O modelo declara o idioma como `pt`; a naturalidade do sotaque brasileiro precisa ser confirmada na escuta. Alex (`alex-pt`, Kokoro / `pm_alex`) fica disponível como referência. Música e efeitos não são aplicados.
 
 ## Instalar (Windows 11)
 
 1. Instale o Python 3.12 (64 bits) se ainda não tiver: `winget install -e --id Python.Python.3.12`
 2. Extraia o zip numa pasta **sem espaços ou acentos no caminho** (ex.: `C:\Ragnarok`).
 3. Duplo clique em `install.bat` (ou: `powershell -ExecutionPolicy Bypass -File .\install.ps1`).
-   Cria a pasta `.venv`, instala as dependências, baixa Kokoro (necessário para Alex) e roda um diagnóstico.
-   O Supertonic, usado por vozes opcionais, pode ser instalado separadamente com `ragnarok models`.
-   Reserve ~1,5 GB livres; o tamanho exato varia entre versões do Python e do Windows.
+   Cria a pasta `.venv`, instala as dependências, baixa os modelos Kokoro e Supertonic e roda um diagnóstico.
+   Para instalar só Kokoro: `ragnarok.bat models --kokoro`.
+   Reserve ~2 GB livres; o tamanho exato varia entre versões do Python e do Windows.
 
 Linux/macOS: `./install.sh`.
 
@@ -21,8 +21,8 @@ Linux/macOS: `./install.sh`.
 ```
 ragnarok.bat                      abre a interface web em http://127.0.0.1:8765
 ragnarok.bat voices               lista as vozes
-ragnarok.bat say "Olá, mundo" --voice alex-pt --speed 0.95 --out ola.wav
-ragnarok.bat models --kokoro         instala só o engine usado por Alex
+ragnarok.bat say "Olá, mundo" --voice sabio-pt --speed 0.85 --out ola.wav
+ragnarok.bat models                  instala/verifica os dois engines
 ragnarok.bat say --file texto.txt --voice sabio-pt --speed 0.95 --out texto.wav
 ragnarok.bat book ensaio.md --voice alex-pt --out ensaio.m4b --title "Meu ensaio" --author "Autor"
 ragnarok.bat doctor [--full]      diagnóstico da instalação
@@ -30,8 +30,8 @@ ragnarok.bat doctor [--full]      diagnóstico da instalação
 (no Linux: `./run.sh ...`; também há `run.ps1`.)
 
 **Vozes** (arquivo `config/voices.json`): `michael-en` (maduro, EN), `onyx-en` (grave, EN), `sabio-en` (EN),
-`alex-pt` (maduro, PT-BR), `sabio-pt` (PT-BR), `dora-pt` (feminina, PT-BR), `heart-en` (feminina, EN).
-`--speed` é um multiplicador sobre a velocidade base da voz (padrão 0.95; a velocidade efetiva de Alex começa em 0.95×).
+`alex-pt` (maduro, PT-BR), `sabio-pt` (Supertonic M5; sotaque a confirmar), `dora-pt` (feminina, PT-BR), `heart-en` (feminina, EN).
+`--speed` é um multiplicador sobre a velocidade base da voz (padrão 0.85; para `sabio-pt`, a velocidade efetiva começa em 0.85×).
 
 **Livros** (`book`): cada cabeçalho Markdown do nível mais alto do arquivo (`#`) vira um capítulo (títulos mais fundos
 viram subtítulos lidos no texto). O título do capítulo é lido em voz alta (use `--no-titles` para não ler).

@@ -103,3 +103,12 @@ Ambiente desta execução: Windows 11, Python 3.12.10 64 bits, Kokoro ONNX 0.6.1
 - O instalador foi corrigido para direcionar temporários do Windows a `data/tmp`; sem isso, `ensurepip` e o phonemizer podem falhar em ambientes que bloqueiam `%TEMP%` do sistema.
 
 Ainda não foi feita avaliação auditiva subjetiva nem teste visual em navegador do fluxo web. A compatibilidade do arquivo e as métricas foram verificadas localmente.
+
+## 10. Sábio PT — avaliação inicial no Windows (29/10/2026)
+
+Ambiente: Windows 11, Python 3.12.10 64 bits, Supertonic-3 / voz M5, CPU; `ragnarok models` baixou o modelo, e `ragnarok doctor` terminou em `TUDO OK` com Supertonic como engine obrigatório.
+
+- Amostra integral de calibração (mesmo texto usado na comparação Alex), `sabio-pt`, velocidade efetiva 0,85×: 724 caracteres, 13 blocos, 86,19 s de áudio, 44,0 s de processamento (RTF 0,511), pico 510 MB e zero anomalias. WAV mono 44,1 kHz; pico digital 0,453, sem clipping.
+- Trecho adicional com “zazen”, “aquietamento”, “transmutação”, “integração” e pergunta: 14,42 s, 2 blocos, 8,2 s de processamento, pico 506 MB e zero anomalias.
+- Estimativa acústica exploratória por autocorrelação: F0 mediana aproximada de 90 Hz para Sábio e 134 Hz para Alex. Isso indica frequência fundamental mais baixa no trecho e não comprova timbre percebido, naturalidade, emoção ou sotaque.
+- O Supertonic recebe o idioma `pt`; essa configuração não identifica explicitamente a variante brasileira. A confirmação de pronúncia e prosódia brasileiras ainda depende de escuta. As gravações estão entregues para comparação; nenhuma alternativa foi escolhida sem essa avaliação.

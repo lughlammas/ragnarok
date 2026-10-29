@@ -56,9 +56,9 @@ if (-not (Test-Path '.venv\Scripts\python.exe')) { Run $py @('-m', 'venv', '.ven
 $vpy = Join-Path $PSScriptRoot '.venv\Scripts\python.exe'
 Run $vpy @('-m', 'pip', 'install', '--upgrade', 'pip', '-q')
 Run $vpy @('-m', 'pip', 'install', '-r', 'requirements.txt')
-Run $vpy @('-m', 'ragnarok', 'models', '--kokoro')
+Run $vpy @('-m', 'ragnarok', 'models')
 if (-not $SkipTest) { Run $vpy @('-m', 'ragnarok', 'doctor') }
 
 Write-Host ""
 Write-Host "Pronto! Para abrir:  .\ragnarok.bat     (ou  .\run.ps1)" -ForegroundColor Green
-Write-Host "Exemplo:  .\ragnarok.bat say ""Olá, mundo"" --voice alex-pt --speed 0.95 --out ola.wav"
+Write-Host "Exemplo:  .\ragnarok.bat say ""Olá, mundo"" --voice sabio-pt --speed 0.85 --out ola.wav"
